@@ -107,11 +107,12 @@ class block_my_certificates extends block_list {
                 }
 
                 if (!empty($myaccessiblecerts)) {
+                    $attrs = array('class' => 'iconlarge');
                     foreach ($myaccessiblecerts as $cert) {
                         if (array_key_exists($cert->id, $certifiablecerts)) {
-                            $this->content->icons[] = '<img class="iconlarge" title="'.$certstomakestr.'" src="'.$OUTPUT->pix_url('hoticon', 'block_my_certificates').'" />';
+                            $this->content->icons[] = $OUTPUT->pix_icon('hoticon', $certstomakestr, 'block_my_certificates', $attrs);
                         } else {
-                            $this->content->icons[] = '<img class="iconlarge" src="'.$OUTPUT->pix_url('icon', 'certificate').'" />';
+                            $this->content->icons[] = $OUTPUT->pix_icon('icon', '', 'certificate', $attrs);
                         }
                         $reporturl = new moodle_url('/mod/certificate/report.php', array('id' => $cert->cmid));
                         $this->content->items[] = '<a href="'.$reporturl.'">['.$cert->shortname.'] '.$cert->name.'</a>';
