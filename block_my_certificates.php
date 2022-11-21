@@ -77,7 +77,7 @@ class block_my_certificates extends block_list {
             }
         } else {
             // I'am watching certificates of my behalfes, not mine
-            require_once($CFG->dirroot.'/mod/certificate/xlib.php');
+            require_once($CFG->dirroot.'/mod/pdcertificate/xlib.php');
             $mycontext = context_user::instance($USER->id);
 
             $certstomakestr = get_string('certstomake', 'block_my_certificates');
@@ -114,7 +114,7 @@ class block_my_certificates extends block_list {
                         } else {
                             $this->content->icons[] = $OUTPUT->pix_icon('icon', '', 'certificate', $attrs);
                         }
-                        $reporturl = new moodle_url('/mod/certificate/report.php', array('id' => $cert->cmid));
+                        $reporturl = new moodle_url('/mod/pdcertificate/report.php', array('id' => $cert->cmid));
                         $this->content->items[] = '<a href="'.$reporturl.'">['.$cert->shortname.'] '.$cert->name.'</a>';
                     }
                 } else {
