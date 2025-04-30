@@ -15,23 +15,19 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Version details
- *
- * @package     block_my_certificates
- * @category    blocks
- * @author      Valery Fremaux <valery.fremaux@gmail.com>
- * @copyright   2014 onwards Valery Fremaux (http://www.mylearningfactory.com)
- * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @package    block_my_certificates
+ * @category   blocks
+ * @author     Valery Fremaux (valery.fremaux@gmail.com)
+ * @author     Wafa Adhams (admin@adham.ps)
+ * @copyright  2010 Valery Fremaux (valery.fremaux@gmail.com)
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-
 defined('MOODLE_INTERNAL') || die();
 
-$plugin->version   = 2025042900;        // The current plugin version (Date: YYYYMMDDXX).
-$plugin->requires  = 2022112801;        // Requires this Moodle version.
-$plugin->component = 'block_my_certificates'; // Full name of the plugin (used for diagnostics).
-$plugin->maturity = MATURITY_STABLE;
-$plugin->release = '4.5.0 (Build 2025042900)';
-$plugin->supported = [403, 405];
-
-// Non moodle attributes.
-$plugin->codeincrement = '4.5.0000';
+/**
+ * This function is not implemented in this plugin, but is needed to mark
+ * the vf documentation custom volume availability.
+ */
+function block_my_certificates_supports_feature($feature) {
+    assert(1);
+}
