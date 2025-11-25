@@ -1,4 +1,6 @@
-<?php //$Id: block_certificates.php,v 1.8.22.8 2009/10/30 23:36:26 poltawski Exp $
+<?php
+
+require_once($CFG->dirroot.'/mod/pdcertificate/xlib.php');
 
 class block_my_certificates extends block_list {
 
@@ -41,35 +43,39 @@ class block_my_certificates extends block_list {
         }
 
         $this->content = new stdClass();
-        $this->content->icons = array();
-        $this->content->items = array();
+        $this->content->icons = [];
+        $this->content->items = [];
 
         if (empty($this->config->accessbehalfed)) {
             // In this case, we get your own certificates
-            $sql = "
-                SELECT DISTINCT
-                    cm.id,
-                    cm.instance
-                FROM
-                    {role_assignments} ra,
-                    {context} c,
-                    {course_modules} cm,
-                    {modules} m
-                WHERE
-                    ra.contextid = c.id AND
-                    c.instanceid = cm.id AND
-                    c.contextlevel = ".CONTEXT_USER." AND
-                    ra.userid = {$USER->id} AND
-                    cm.module = m.id AND
-                    m.name = 'certificate'
-            ";
+            $ownissues = pdcertificate_get_my_pdcertificates();
 
-            if ($role_assignments = $DB->get_records_sql($sql)) {
-                foreach ($role_assignments as $cm) {
-                    $url = new moodle_url('/mod/certificate/view.php', array('id' => $cm->id));
-                    $certificate = $DB->get_record('certificate', array('id' => $cm->instance));
-                    $this->content->icons[] = '<img src="'.$OUTPUT->pîx_url('icon', 'certificate').'" />';
-                    $this->content->items[] = '<a href="'.$url.'">'.$certificate->name.'</a>';
+            $fs = get_file_storage();
+
+            if (!empty($ownissues)) {
+                foreach ($ownissues as $issue) {
+
+                    $certificate = $DB->get_record('pdcertificate', ['id' => $issue->modid]);
+
+                    if (!empty($certificate->savecert)) {
+                        // Accessibility to the pdcertificate module in the course space IS NOT VERIFIED.
+                        // This is done to let the users download their certificates even when enrol has been disabled.
+                        $context = context_module::instance($issue->cmid);
+                        $certfiles = $fs->get_area_files($context->id, 'mod_pdcertificate', 'issue', $issue->id, "itemid, filepath, filename", false);
+                        if (!empty($certfiles)) {
+                            $f = array_pop($certfiles);
+                            $url = moodle_url::make_pluginfile_url($f->get_contextid(), $f->get_component(), $f->get_filearea(),
+                                    $f->get_itemid(), $f->get_filepath(), $f->get_filename(), true);
+                        }
+                    } else {
+                        $url = new moodle_url('/mod/pdcertificate/view.php', ['id' => $issue->cmid, 'sesskey' => sesskey()]);
+                    }
+
+                    if (!empty($url)) {
+                        $this->content->icons[] = $OUTPUT->pix_icon('icon', '', 'pdcertificate');
+                        $this->content->items[] = '<a href="'.$url.'">'.$certificate->name.'</a>';
+                    }
+
                 }
             } else {
                 $this->content->icons[] = '';
@@ -93,7 +99,7 @@ class block_my_certificates extends block_list {
 
                 foreach ($mybehalfs as $u) {
                     foreach ($mycourses as $cid => $course) {
-                        if ($certs = certificate_get_user_certificates($course, $u->id)) {
+                        if ($certs = pdcertificate_get_user_pdcertificates($course, $u->id)) {
     
                             // Save that this cert has potential certifiable users
                             foreach ($certs as $cert) {
@@ -112,7 +118,7 @@ class block_my_certificates extends block_list {
                         if (array_key_exists($cert->id, $certifiablecerts)) {
                             $this->content->icons[] = $OUTPUT->pix_icon('hoticon', $certstomakestr, 'block_my_certificates', $attrs);
                         } else {
-                            $this->content->icons[] = $OUTPUT->pix_icon('icon', '', 'certificate', $attrs);
+                            $this->content->icons[] = $OUTPUT->pix_icon('icon', '', 'pdcertificate', $attrs);
                         }
                         $reporturl = new moodle_url('/mod/pdcertificate/report.php', array('id' => $cert->cmid));
                         $this->content->items[] = '<a href="'.$reporturl.'">['.$cert->shortname.'] '.$cert->name.'</a>';
